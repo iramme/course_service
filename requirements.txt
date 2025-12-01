@@ -5,3 +5,4 @@ django-cors-headers==4.4.0
 gunicorn==22.0.0
 django-extensions
 django-filter
+requests
