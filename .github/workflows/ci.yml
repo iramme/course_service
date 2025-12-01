@@ -1,0 +1,67 @@
+name: Django CI and Deploy to Render
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_DB: django
+          POSTGRES_USER: django
+          POSTGRES_PASSWORD: django
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd="pg_isready -U django"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      # Step 1: Checkout the repository
+      - uses: actions/checkout@v4
+
+      # Step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Step 4: Export GitHub Actions flag
+      - name: Export GitHub Actions flag
+        run: echo "GITHUB_ACTIONS=true" >> $GITHUB_ENV
+
+      # Step 5: Apply migrations
+      - name: Apply migrations
+        run: python manage.py migrate --noinput
+
+      # Step 6: Run tests
+      - name: Run tests
+        run: python manage.py test
+
+      # Step 7: Build Docker image
+      - name: Build Docker image
+        run: docker build -t my-django-app .
+
+      # Step 8: Deploy to Render
+      - name: Deploy to Render
+        uses: johnbeynon/render-deploy-action@v0.0.8
+        with:
+          service-id: ${{ secrets.SERVICE_ID }}
+          api-key: ${{ secrets.RENDER_API_KEY }}
+      - name: Install Gunicorn
+        run: pip install gunicorn==22.0.0
