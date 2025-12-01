@@ -292,43 +292,63 @@ def get_students_by_course(request, course_id):
     # Récupérer toutes les inscriptions pour ce cours
     enrollments = StudentCourse.objects.filter(course=course)
     
+    if not enrollments.exists():
+        return Response({
+            "course_id": course_id,
+            "course_name": course.name,
+            "message": "Aucun étudiant inscrit à ce cours",
+            "students": []
+        })
+    
     students_data = []
     
     # Pour chaque inscription, récupérer les détails de l'étudiant
     for enrollment in enrollments:
+        student_id_value = enrollment.student_id
+        
         try:
-            # Appeler le Student Service pour récupérer les infos complètes
-            student_response = requests.get(f"https://student-service-r9fd.onrender.com/api/students/{student_id}")            
+            # Appeler le Student Service
+            student_response = requests.get(
+                f"https://student-service-r9fd.onrender.com/api/students/{student_id_value}",
+                timeout=5  # Timeout de 5 secondes
+            )
+            
             if student_response.status_code == 200:
                 student_data = student_response.json()
                 students_data.append({
                     "id": student_data.get("id"),
-                    "first_name": student_data.get("firstName", ""),
-                    "last_name": student_data.get("lastName", ""),
-                    "email": student_data.get("email", ""),
-                    # Ajouter d'autres champs si nécessaire
+                    "first_name": student_data.get("first_name") or student_data.get("firstName", f"Étudiant {student_id_value}"),
+                    "last_name": student_data.get("last_name") or student_data.get("lastName", ""),
+                    "email": student_data.get("email", f"student{student_id_value}@example.com"),
                 })
             else:
-                # Si l'étudiant n'est pas trouvé, utiliser les infos de base
+                # Si l'étudiant n'est pas trouvé
                 students_data.append({
-                    "id": enrollment.student_id,
+                    "id": student_id_value,
                     "first_name": "Étudiant",
-                    "last_name": f"#{enrollment.student_id}",
+                    "last_name": f"#{student_id_value}",
                     "email": "Non disponible"
                 })
                 
-        except requests.exceptions.RequestException as e:
-            # En cas d'erreur de connexion
+        except requests.exceptions.Timeout:
             students_data.append({
-                "id": enrollment.student_id,
+                "id": student_id_value,
                 "first_name": "Étudiant",
-                "last_name": f"#{enrollment.student_id}",
-                "email": "Service indisponible"
+                "last_name": f"#{student_id_value}",
+                "email": "Timeout - Service Student lent"
+            })
+        except requests.exceptions.RequestException as e:
+            students_data.append({
+                "id": student_id_value,
+                "first_name": "Étudiant",
+                "last_name": f"#{student_id_value}",
+                "email": f"Erreur: {str(e)[:50]}"
             })
 
     return Response({
         "course_id": course_id,
         "course_name": course.name,
+        "students_count": len(students_data),
         "students": students_data
     })
 @api_view(['GET'])
