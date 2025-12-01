@@ -93,7 +93,7 @@ REST_FRAMEWORK = {
 
 # URL de base du microservice Student Service
 # Cette URL doit correspondre à l'URL de votre service Spring Boot
-STUDENT_SERVICE_URL = 'http://localhost:8081/api/students'
+STUDENT_SERVICE_URL = 'https://student-service-1.onrender.com/api/students'
 
 # Timeout pour les appels HTTP vers le microservice (en secondes)
 # Si le microservice ne répond pas dans ce délai, l'appel sera annulé
