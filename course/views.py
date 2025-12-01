@@ -241,7 +241,7 @@ def enroll_student(request):
 
     # 3️⃣ Vérifier si l'étudiant existe dans le Student Service
     try:
-        student_response = requests.get(f"http://localhost:8081/api/students/{student_id}")
+        student_response = requests.get(f"https://student-service-1.onrender.com/api/students/{student_id}")
         if student_response.status_code != 200:
             return Response(
                 {"error": "Étudiant introuvable dans le service Student."},
@@ -298,7 +298,7 @@ def get_students_by_course(request, course_id):
     for enrollment in enrollments:
         try:
             # Appeler le Student Service pour récupérer les infos complètes
-            student_response = requests.get(f"http://localhost:8081/api/students/{enrollment.student_id}")
+            student_response = requests.get(f"https://student-service-1.onrender.com/api/students/{enrollment.student_id}")
             
             if student_response.status_code == 200:
                 student_data = student_response.json()
