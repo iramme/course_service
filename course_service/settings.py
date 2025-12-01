@@ -43,7 +43,7 @@ DEBUG = True
 
 # Liste des hôtes autorisés à accéder à l'application
 # En développement, on peut laisser vide pour accepter toutes les connexions
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'course-service-2.onrender.com']
 
 # =============================================================================
 # CONFIGURATION DES APPLICATIONS
