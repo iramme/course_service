@@ -59,11 +59,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',     # Système de messages
     'django.contrib.staticfiles',  # Gestion des fichiers statiques (CSS, JS, images)
     'rest_framework.authtoken' ,
-    'django_extensions',
+    
     # Applications tierces pour l'API REST
     'rest_framework',              # Django REST Framework pour créer des APIs
     'django_filters',              # Filtrage avancé pour les APIs
-    
+    'django_extensions',
     # Application locale
     'course',        
     
